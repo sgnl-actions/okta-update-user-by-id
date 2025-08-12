@@ -1,7 +1,7 @@
 {
-  "name": "@sgnl/job-template",
+  "name": "@sgnl/okta-update-user-by-id",
   "version": "1.0.0",
-  "description": "Template for SGNL JavaScript jobs",
+  "description": "Update an existing user's profile in Okta using their Okta userId as identifier",
   "type": "module",
   "main": "dist/index.js",
   "scripts": {
@@ -15,7 +15,7 @@
     "validate": "node scripts/validate-metadata.js",
     "dev": "node scripts/dev-runner.js"
   },
-  "keywords": ["sgnl", "job", "template", "identity", "security"],
+  "keywords": ["sgnl", "okta", "user-update", "identity", "security"],
   "author": "SGNL Engineering",
   "license": "MIT",
   "dependencies": {

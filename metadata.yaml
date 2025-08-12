@@ -1,48 +1,113 @@
-name: job-template
-description: Template for SGNL JavaScript jobs - replace with your job description
+name: okta-update-user-by-id
+description: Update an existing user's profile in Okta using their Okta userId as identifier
 
 # Input parameters for web form generation
 inputs:
-  target:
+  userId:
     type: text
-    description: Target resource identifier (e.g., user email, group ID)
+    description: User's Okta userId identifier to update
+    required: true
+    validation:
+      min: 1
+      max: 200
+
+  firstName:
+    type: text
+    description: User's first name (optional)
+    required: false
+    validation:
+      min: 0
+      max: 100
+
+  lastName:
+    type: text
+    description: User's last name (optional)
+    required: false
+    validation:
+      min: 0
+      max: 100
+
+  email:
+    type: text
+    description: User's new email address (optional)
+    required: false
+    validation:
+      min: 0
+      max: 200
+
+  department:
+    type: text
+    description: User's department (optional)
+    required: false
+    validation:
+      min: 0
+      max: 100
+
+  employeeNumber:
+    type: text
+    description: Employee number (optional)
+    required: false
+    validation:
+      min: 0
+      max: 50
+
+  additionalProfileAttributes:
+    type: text
+    description: JSON string of additional profile attributes (optional)
+    required: false
+    validation:
+      min: 0
+      max: 1000
+
+  oktaDomain:
+    type: text
+    description: The Okta domain (e.g., example.okta.com)
     required: true
     validation:
       min: 1
       max: 100
+      pattern: '^[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9]?\.okta(\.com|\.eu|\.au|\.jp)?$'
 
-  action:
-    type: text
-    description: Action to perform on the target resource
-    required: true
-    validation:
-      min: 1
-      max: 50
-
-  options:
-    type: array
-    description: Additional options for the operation
-    required: false
-    item_type: text
-    validation:
-      max: 10
-
-  dry_run:
-    type: boolean
-    description: Preview changes without executing them
-    required: false
-    default: false
+# Required secrets (configured at deployment time)
+secrets:
+  - OKTA_API_TOKEN
 
 # Expected output structure
 outputs:
+  id:
+    type: text
+    description: The Okta user ID of the updated user
+
   status:
     type: text
-    description: Operation result (success, failed, recovered, etc.)
+    description: The user's status in Okta
 
-  target:
-    type: text
-    description: The target resource that was processed
-
-  processed_at:
+  created:
     type: datetime
-    description: When the operation completed (ISO 8601)
+    description: When the user was created (ISO 8601)
+
+  activated:
+    type: datetime
+    description: When the user was activated (ISO 8601)
+
+  statusChanged:
+    type: datetime
+    description: When the user's status last changed (ISO 8601)
+
+  lastLogin:
+    type: datetime
+    description: When the user last logged in (ISO 8601)
+
+  lastUpdated:
+    type: datetime
+    description: When the user was last updated (ISO 8601)
+
+  profile:
+    type: object
+    description: The user's updated profile information
+
+# Runtime configuration
+runtime:
+  type: nodejs-22
+  timeout: 30s
+  memory: 128Mi
