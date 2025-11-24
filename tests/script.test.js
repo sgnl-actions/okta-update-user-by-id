@@ -6,7 +6,7 @@ describe('Okta Update User By ID Script', () => {
       ENVIRONMENT: 'test'
     },
     secrets: {
-      OKTA_API_TOKEN: 'test-okta-token-123456'
+      BEARER_AUTH_TOKEN: 'test-okta-token-123456'
     },
     outputs: {}
   };
@@ -179,7 +179,7 @@ describe('Okta Update User By ID Script', () => {
         .rejects.toThrow('Invalid or missing oktaDomain parameter');
     });
 
-    test('should throw error for missing OKTA_API_TOKEN', async () => {
+    test('should throw error for missing BEARER_AUTH_TOKEN', async () => {
       const params = {
         userId: 'user123',
         firstName: 'Jane',
@@ -192,7 +192,7 @@ describe('Okta Update User By ID Script', () => {
       };
 
       await expect(script.invoke(params, contextWithoutToken))
-        .rejects.toThrow('Missing required secret: OKTA_API_TOKEN');
+        .rejects.toThrow('Missing required secret: BEARER_AUTH_TOKEN');
     });
 
     test('should handle API error with errorSummary', async () => {
