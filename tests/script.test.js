@@ -2,11 +2,11 @@ import script from '../src/script.mjs';
 
 describe('Okta Update User By ID Script', () => {
   const mockContext = {
-    env: {
-      ENVIRONMENT: 'test'
+    environment: {
+      ADDRESS: 'https://example.okta.com'
     },
     secrets: {
-      OKTA_API_TOKEN: 'test-okta-token-123456'
+      BEARER_AUTH_TOKEN: 'test-okta-token-123456'
     },
     outputs: {}
   };
@@ -68,7 +68,7 @@ describe('Okta Update User By ID Script', () => {
       const params = {
         userId: 'user123',
         firstName: 'Jane',
-        oktaDomain: 'example.okta.com'
+        address: 'https://example.okta.com'
       };
 
       const result = await script.invoke(params, mockContext);
@@ -87,7 +87,7 @@ describe('Okta Update User By ID Script', () => {
         email: 'jane.smith@newdomain.com',
         department: 'Engineering',
         employeeNumber: 'EMP002',
-        oktaDomain: 'example.okta.com'
+        address: 'https://example.okta.com'
       };
 
       const result = await script.invoke(params, mockContext);
@@ -102,7 +102,7 @@ describe('Okta Update User By ID Script', () => {
         userId: 'user123',
         firstName: 'Jane',
         additionalProfileAttributes: '{"mobilePhone": "555-5678", "title": "Senior Engineer"}',
-        oktaDomain: 'example.okta.com'
+        address: 'https://example.okta.com'
       };
 
       const result = await script.invoke(params, mockContext);
@@ -111,13 +111,27 @@ describe('Okta Update User By ID Script', () => {
       expect(result.status).toBe('ACTIVE');
     });
 
+    test('should use environment.ADDRESS when params.address is not provided', async () => {
+      const params = {
+        userId: 'user123',
+        firstName: 'Jane'
+        // No address parameter - should use environment.ADDRESS
+      };
+
+      const result = await script.invoke(params, mockContext);
+
+      expect(result.id).toBe('user123');
+      expect(result.status).toBe('ACTIVE');
+      expect(result.profile.firstName).toBe('Jane');
+    });
+
     test('should handle empty string fields by ignoring them', async () => {
       const params = {
         userId: 'user123',
         firstName: 'Jane',
         lastName: '',
         department: '  ',
-        oktaDomain: 'example.okta.com'
+        address: 'https://example.okta.com'
       };
 
       const result = await script.invoke(params, mockContext);
@@ -129,7 +143,7 @@ describe('Okta Update User By ID Script', () => {
     test('should throw error when no profile fields provided', async () => {
       const params = {
         userId: 'user123',
-        oktaDomain: 'example.okta.com'
+        address: 'https://example.okta.com'
       };
 
       await expect(script.invoke(params, mockContext))
@@ -141,7 +155,7 @@ describe('Okta Update User By ID Script', () => {
         userId: 'user123',
         firstName: 'Jane',
         additionalProfileAttributes: 'invalid-json',
-        oktaDomain: 'example.okta.com'
+        address: 'https://example.okta.com'
       };
 
       await expect(script.invoke(params, mockContext))
@@ -151,7 +165,7 @@ describe('Okta Update User By ID Script', () => {
     test('should throw error for missing userId', async () => {
       const params = {
         firstName: 'Jane',
-        oktaDomain: 'example.okta.com'
+        address: 'https://example.okta.com'
       };
 
       await expect(script.invoke(params, mockContext))
@@ -162,28 +176,33 @@ describe('Okta Update User By ID Script', () => {
       const params = {
         userId: '',
         firstName: 'Jane',
-        oktaDomain: 'example.okta.com'
+        address: 'https://example.okta.com'
       };
 
       await expect(script.invoke(params, mockContext))
         .rejects.toThrow('Invalid or missing userId parameter');
     });
 
-    test('should throw error for missing oktaDomain', async () => {
+    test('should throw error for missing address', async () => {
       const params = {
         userId: 'user123',
         firstName: 'Jane'
       };
 
-      await expect(script.invoke(params, mockContext))
-        .rejects.toThrow('Invalid or missing oktaDomain parameter');
+      const contextWithoutAddress = {
+        ...mockContext,
+        environment: {}
+      };
+
+      await expect(script.invoke(params, contextWithoutAddress))
+        .rejects.toThrow('No URL specified. Provide address parameter or ADDRESS environment variable');
     });
 
-    test('should throw error for missing OKTA_API_TOKEN', async () => {
+    test('should throw error for missing BEARER_AUTH_TOKEN', async () => {
       const params = {
         userId: 'user123',
         firstName: 'Jane',
-        oktaDomain: 'example.okta.com'
+        address: 'https://example.okta.com'
       };
 
       const contextWithoutToken = {
@@ -192,14 +211,14 @@ describe('Okta Update User By ID Script', () => {
       };
 
       await expect(script.invoke(params, contextWithoutToken))
-        .rejects.toThrow('Missing required secret: OKTA_API_TOKEN');
+        .rejects.toThrow('No authentication configured');
     });
 
     test('should handle API error with errorSummary', async () => {
       const params = {
         userId: 'user123',
         firstName: 'Jane',
-        oktaDomain: 'example.okta.com'
+        address: 'https://example.okta.com'
       };
 
       global.fetch = () => Promise.resolve({
@@ -222,7 +241,7 @@ describe('Okta Update User By ID Script', () => {
       const params = {
         userId: 'user123',
         firstName: 'Jane',
-        oktaDomain: 'example.okta.com'
+        address: 'https://example.okta.com'
       };
 
       global.fetch = () => Promise.resolve({
@@ -266,7 +285,7 @@ describe('Okta Update User By ID Script', () => {
       const params = {
         userId: 'user123',
         firstName: 'Test',
-        oktaDomain: 'example.okta.com'
+        address: 'https://example.okta.com'
       };
 
       await script.invoke(params, mockContext);
