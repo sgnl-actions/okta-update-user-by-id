@@ -3,7 +3,7 @@ import script from '../src/script.mjs';
 describe('Okta Update User By ID Script', () => {
   const mockContext = {
     environment: {
-      ENVIRONMENT: 'test'
+      ADDRESS: 'https://example.okta.com'
     },
     secrets: {
       BEARER_AUTH_TOKEN: 'test-okta-token-123456'
@@ -111,6 +111,20 @@ describe('Okta Update User By ID Script', () => {
       expect(result.status).toBe('ACTIVE');
     });
 
+    test('should use environment.ADDRESS when params.address is not provided', async () => {
+      const params = {
+        userId: 'user123',
+        firstName: 'Jane'
+        // No address parameter - should use environment.ADDRESS
+      };
+
+      const result = await script.invoke(params, mockContext);
+
+      expect(result.id).toBe('user123');
+      expect(result.status).toBe('ACTIVE');
+      expect(result.profile.firstName).toBe('Jane');
+    });
+
     test('should handle empty string fields by ignoring them', async () => {
       const params = {
         userId: 'user123',
@@ -175,7 +189,12 @@ describe('Okta Update User By ID Script', () => {
         firstName: 'Jane'
       };
 
-      await expect(script.invoke(params, mockContext))
+      const contextWithoutAddress = {
+        ...mockContext,
+        environment: {}
+      };
+
+      await expect(script.invoke(params, contextWithoutAddress))
         .rejects.toThrow('No URL specified. Provide address parameter or ADDRESS environment variable');
     });
 
