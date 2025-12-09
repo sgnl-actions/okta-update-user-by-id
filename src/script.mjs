@@ -5,11 +5,13 @@
  * Supports optional firstName, lastName, email, department, employeeNumber, and additionalProfileAttributes.
  */
 
+import { getBaseUrl, getAuthorizationHeader } from '@sgnl-actions/utils';
+
 /**
  * Helper function to update a user in Okta by userId
  * @private
  */
-async function updateUser(params, oktaDomain, authToken) {
+async function updateUser(params, baseUrl, authHeader) {
   const { userId, firstName, lastName, email, department, employeeNumber, additionalProfileAttributes } = params;
 
   // Build profile object with only fields that are provided
@@ -53,10 +55,9 @@ async function updateUser(params, oktaDomain, authToken) {
   };
 
   // Use userId directly in URL (no encoding needed for userId unlike login/email)
-  const url = new URL(`/api/v1/users/${userId}`, `https://${oktaDomain}`);
-  const authHeader = authToken.startsWith('SSWS ') ? authToken : `SSWS ${authToken}`;
+  const url = `${baseUrl}/api/v1/users/${userId}`;
 
-  const response = await fetch(url.toString(), {
+  const response = await fetch(url, {
     method: 'POST',
     headers: {
       'Authorization': authHeader,
@@ -75,19 +76,37 @@ export default {
    * Main execution handler - updates an existing user in Okta by userId
    * @param {Object} params - Job input parameters
    * @param {string} params.userId - User's Okta userId identifier to update
+   * @param {string} params.login - User's login (optional)
    * @param {string} params.firstName - User's first name (optional)
    * @param {string} params.lastName - User's last name (optional)
-   * @param {string} params.email - User's new email address (optional)
+   * @param {string} params.email - User's email address (optional)
    * @param {string} params.department - User's department (optional)
    * @param {string} params.employeeNumber - Employee number (optional)
    * @param {string} params.additionalProfileAttributes - JSON string of additional attributes (optional)
-   * @param {string} params.oktaDomain - The Okta domain
-   * @param {Object} context - Execution context with env, secrets, outputs
-   * @param {string} context.secrets.BEARER_AUTH_TOKEN - Bearer token for Okta API authentication
+   * @param {string} params.address - Full URL to Okta API (defaults to ADDRESS environment variable)
+   *
+   * @param {Object} context - Execution context with secrets and environment
+   * @param {string} context.environment.ADDRESS - Default Okta API base URL
+   *
+   * The configured auth type will determine which of the following environment variables and secrets are available
+   * @param {string} context.secrets.BEARER_AUTH_TOKEN
+   *
+   * @param {string} context.secrets.BASIC_USERNAME
+   * @param {string} context.secrets.BASIC_PASSWORD
+   *
+   * @param {string} context.secrets.OAUTH2_CLIENT_CREDENTIALS_CLIENT_SECRET
+   * @param {string} context.environment.OAUTH2_CLIENT_CREDENTIALS_AUDIENCE
+   * @param {string} context.environment.OAUTH2_CLIENT_CREDENTIALS_AUTH_STYLE
+   * @param {string} context.environment.OAUTH2_CLIENT_CREDENTIALS_CLIENT_ID
+   * @param {string} context.environment.OAUTH2_CLIENT_CREDENTIALS_SCOPE
+   * @param {string} context.environment.OAUTH2_CLIENT_CREDENTIALS_TOKEN_URL
+   *
+   * @param {string} context.secrets.OAUTH2_AUTHORIZATION_CODE_ACCESS_TOKEN
+   *
    * @returns {Object} Job results with updated user information
    */
   invoke: async (params, context) => {
-    const { userId, oktaDomain } = params;
+    const { userId } = params;
 
     console.log(`Starting Okta user update for userId: ${userId}`);
 
@@ -95,20 +114,24 @@ export default {
     if (!userId || typeof userId !== 'string') {
       throw new Error('Invalid or missing userId parameter');
     }
-    if (!oktaDomain || typeof oktaDomain !== 'string') {
-      throw new Error('Invalid or missing oktaDomain parameter');
-    }
 
-    // Validate Okta API token is present
-    if (!context.secrets?.BEARER_AUTH_TOKEN) {
-      throw new Error('Missing required secret: BEARER_AUTH_TOKEN');
+    // Get base URL using utility function
+    const baseUrl = getBaseUrl(params, context);
+
+    // Get authorization header
+    let authHeader = await getAuthorizationHeader(context);
+
+    // Handle Okta's SSWS token format for Bearer auth mode
+    if (authHeader.startsWith('Bearer ')) {
+      const token = authHeader.substring(7);
+      authHeader = token.startsWith('SSWS ') ? token : `SSWS ${token}`;
     }
 
     // Make the API request to update user
     const response = await updateUser(
       params,
-      oktaDomain,
-      context.secrets.BEARER_AUTH_TOKEN
+      baseUrl,
+      authHeader
     );
 
     // Handle the response
