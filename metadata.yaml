@@ -101,6 +101,10 @@ outputs:
     type: object
     description: The user's updated profile information
 
+  address:
+    type: text
+    description: The Okta API base URL used
+
 # Runtime configuration
 runtime:
   type: nodejs-22
