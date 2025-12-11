@@ -118,11 +118,6 @@ export default {
 
     console.log(`Starting Okta user update for userId: ${userId}`);
 
-    // Validate required inputs
-    if (!userId || typeof userId !== 'string') {
-      throw new Error('Invalid or missing userId parameter');
-    }
-
     // Get base URL using utility function
     const baseUrl = getBaseURL(resolvedParams, context);
 
