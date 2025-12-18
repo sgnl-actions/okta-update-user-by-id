@@ -162,27 +162,6 @@ describe('Okta Update User By ID Script', () => {
         .rejects.toThrow('Invalid additionalProfileAttributes JSON');
     });
 
-    test('should throw error for missing userId', async () => {
-      const params = {
-        firstName: 'Jane',
-        address: 'https://example.okta.com'
-      };
-
-      await expect(script.invoke(params, mockContext))
-        .rejects.toThrow('Invalid or missing userId parameter');
-    });
-
-    test('should throw error for empty userId', async () => {
-      const params = {
-        userId: '',
-        firstName: 'Jane',
-        address: 'https://example.okta.com'
-      };
-
-      await expect(script.invoke(params, mockContext))
-        .rejects.toThrow('Invalid or missing userId parameter');
-    });
-
     test('should throw error for missing address', async () => {
       const params = {
         userId: 'user123',

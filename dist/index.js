@@ -556,19 +556,14 @@ var script = {
 
     console.log(`Starting Okta user update for userId: ${userId}`);
 
-    // Validate required inputs
-    if (!userId || typeof userId !== 'string') {
-      throw new Error('Invalid or missing userId parameter');
-    }
-
     // Get base URL using utility function
     const baseUrl = getBaseURL(resolvedParams, context);
 
     // Get authorization header
     let authHeader = await getAuthorizationHeader(context);
 
-    // Handle Okta's SSWS token format for Bearer auth mode
-    if (authHeader.startsWith('Bearer ')) {
+    // Handle Okta's SSWS token format - only for Bearer token auth mode
+    if (context.secrets.BEARER_AUTH_TOKEN && authHeader.startsWith('Bearer ')) {
       const token = authHeader.substring(7);
       authHeader = token.startsWith('SSWS ') ? token : `SSWS ${token}`;
     }
