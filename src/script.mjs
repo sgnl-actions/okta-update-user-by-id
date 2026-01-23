@@ -5,7 +5,7 @@
  * Supports optional firstName, lastName, email, department, employeeNumber, and additionalProfileAttributes.
  */
 
-import { getBaseURL, getAuthorizationHeader, resolveJSONPathTemplates} from '@sgnl-actions/utils';
+import { getBaseURL, getAuthorizationHeader} from '@sgnl-actions/utils';
 
 /**
  * Helper function to update a user in Okta by userId
@@ -70,7 +70,6 @@ async function updateUser(params, baseUrl, authHeader) {
   return response;
 }
 
-
 export default {
   /**
    * Main execution handler - updates an existing user in Okta by userId
@@ -106,20 +105,13 @@ export default {
    * @returns {Object} Job results with updated user information
    */
   invoke: async (params, context) => {
-    const jobContext = context.data || {};
 
-    // Resolve JSONPath templates in params
-    const { result: resolvedParams, errors } = resolveJSONPathTemplates(params, jobContext);
-    if (errors.length > 0) {
-      console.warn('Template resolution errors:', errors);
-    }
-
-    const { userId } = resolvedParams;
+    const { userId } = params;
 
     console.log(`Starting Okta user update for userId: ${userId}`);
 
     // Get base URL using utility function
-    const baseUrl = getBaseURL(resolvedParams, context);
+    const baseUrl = getBaseURL(params, context);
 
     // Get authorization header
     let authHeader = await getAuthorizationHeader(context);
@@ -132,7 +124,7 @@ export default {
 
     // Make the API request to update user
     const response = await updateUser(
-      resolvedParams,
+      params,
       baseUrl,
       authHeader
     );
