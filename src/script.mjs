@@ -5,7 +5,7 @@
  * Supports optional firstName, lastName, email, department, employeeNumber, and additionalProfileAttributes.
  */
 
-import { getBaseURL, createAuthHeaders} from '@sgnl-actions/utils';
+import { getBaseURL, createAuthHeaders } from '@sgnl-actions/utils';
 
 /**
  * Helper function to update a user in Okta by userId
@@ -40,7 +40,7 @@ async function updateUser(params, baseUrl, headers) {
       const additionalAttrs = JSON.parse(additionalProfileAttributes);
       Object.assign(profile, additionalAttrs);
     } catch (error) {
-      throw new Error(`Invalid additionalProfileAttributes JSON: ${error.message}`);
+      throw new Error(`Invalid additionalProfileAttributes JSON: ${error.message}`, { cause: error });
     }
   }
 
