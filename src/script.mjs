@@ -138,7 +138,8 @@ export default {
         statusChanged: userData.statusChanged,
         lastLogin: userData.lastLogin,
         lastUpdated: userData.lastUpdated,
-        profile: userData.profile
+        profile: userData.profile,
+        address: baseUrl
       };
     }
 
