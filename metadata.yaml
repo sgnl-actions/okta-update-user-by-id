@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/sgnl-actions/schemas/main/metadata.schema.json
 name: okta-update-user-by-id
 description: Update an existing user's profile in Okta using their Okta userId as identifier
 
