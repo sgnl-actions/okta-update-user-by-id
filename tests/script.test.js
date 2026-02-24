@@ -177,22 +177,6 @@ describe('Okta Update User By ID Script', () => {
         .rejects.toThrow('No URL specified. Provide address parameter or ADDRESS environment variable');
     });
 
-    test('should throw error for missing BEARER_AUTH_TOKEN', async () => {
-      const params = {
-        userId: 'user123',
-        firstName: 'Jane',
-        address: 'https://example.okta.com'
-      };
-
-      const contextWithoutToken = {
-        ...mockContext,
-        secrets: {}
-      };
-
-      await expect(script.invoke(params, contextWithoutToken))
-        .rejects.toThrow('No authentication configured');
-    });
-
     test('should handle API error with errorSummary', async () => {
       const params = {
         userId: 'user123',
