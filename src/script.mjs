@@ -5,7 +5,7 @@
  * Supports optional firstName, lastName, email, department, employeeNumber, and additionalProfileAttributes.
  */
 
-import { getBaseURL, createAuthHeaders } from '@sgnl-actions/utils';
+import { getBaseURL, createHeaders } from '@sgnl-actions/utils';
 
 /**
  * Helper function to update a user in Okta by userId
@@ -110,7 +110,7 @@ export default {
     const baseUrl = getBaseURL(params, context);
 
     // Get headers using utility function
-    let headers = await createAuthHeaders(context);
+    let headers = await createHeaders(context);
 
     // Handle Okta's SSWS token format - only for Bearer token auth mode
     if (context.secrets.BEARER_AUTH_TOKEN && headers['Authorization'].startsWith('Bearer ')) {
