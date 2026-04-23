@@ -12,12 +12,15 @@ import { getBaseURL, createHeaders } from '@sgnl-actions/utils';
  * @private
  */
 async function updateUser(params, baseUrl, headers) {
-  const { userId, firstName, lastName, email, department, employeeNumber, additionalProfileAttributes } = params;
+  const { userId, login, firstName, lastName, email, department, employeeNumber, additionalProfileAttributes } = params;
 
   // Build profile object with only fields that are provided
   const profile = {};
 
   // Add optional fields if provided and not empty
+  if (login && login.trim()) {
+    profile.login = login.trim();
+  }
   if (firstName && firstName.trim()) {
     profile.firstName = firstName.trim();
   }

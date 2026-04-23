@@ -64,6 +64,41 @@ describe('Okta Update User By ID Script', () => {
   });
 
   describe('invoke handler', () => {
+    test('should update user with login field', async () => {
+      let capturedBody;
+      global.fetch = (url, options) => {
+        capturedBody = JSON.parse(options.body);
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: async () => ({
+            id: 'user123',
+            status: 'ACTIVE',
+            created: '2024-01-15T10:00:00.000Z',
+            activated: '2024-01-15T10:00:00.000Z',
+            statusChanged: '2024-01-15T10:00:00.000Z',
+            lastLogin: null,
+            lastUpdated: '2024-01-15T10:00:00.000Z',
+            profile: {
+              login: 'updated@example.com',
+              firstName: 'Jane'
+            }
+          })
+        });
+      };
+
+      const params = {
+        userId: 'user123',
+        login: 'updated@example.com',
+        address: 'https://example.okta.com'
+      };
+
+      const result = await script.invoke(params, mockContext);
+
+      expect(result.id).toBe('user123');
+      expect(capturedBody.profile.login).toBe('updated@example.com');
+    });
+
     test('should successfully update user with firstName only', async () => {
       const params = {
         userId: 'user123',
