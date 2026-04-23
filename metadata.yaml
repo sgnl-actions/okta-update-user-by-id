@@ -12,6 +12,14 @@ inputs:
       min: 1
       max: 200
 
+  login:
+    type: text
+    description: User's login (optional)
+    required: false
+    validation:
+      min: 0
+      max: 200
+
   firstName:
     type: text
     description: User's first name (optional)
